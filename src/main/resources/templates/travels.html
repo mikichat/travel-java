@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Manage Travels</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h3 {
+            margin: 0;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .action-buttons button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h3>Travel Management</h3>
+        <div>
+            <span style="color: white; margin-right: 10px;" id="loggedInUsername"></span>
+            <a href="/dashboard">Dashboard</a>
+            <a href="#" id="logoutButton">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mb-4">Travel List</h2>
+        <button type="button" class="btn btn-success mb-3" data-toggle="modal" data-target="#addTravelModal">Add New Travel</button>
+
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Destination</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="travelsTableBody">
+                    <!-- Travel data will be loaded here via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Travel Modal -->
+    <div class="modal fade" id="addTravelModal" tabindex="-1" role="dialog" aria-labelledby="addTravelModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTravelModalLabel">Add/Edit Travel</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="travelForm">
+                        <input type="hidden" id="travelId">
+                        <div class="form-group">
+                            <label for="destination">Destination</label>
+                            <input type="text" class="form-control" id="destination" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea class="form-control" id="description" rows="3" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Price</label>
+                            <input type="number" step="0.01" class="form-control" id="price" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Travel</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var jwtToken = localStorage.getItem('jwtToken');
+            var username = localStorage.getItem('username');
+            if (!jwtToken || !username) {
+                window.location.href = '/login';
+                return;
+            }
+            $('#loggedInUsername').text('Hello, ' + username + '!');
+
+            function fetchTravels() {
+                $.ajax({
+                    url: '/api/travels',
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + jwtToken
+                    },
+                    success: function(response) {
+                        if (response.result === 'SUCCESS') {
+                            var travels = response.data;
+                            var tableBody = $('#travelsTableBody');
+                            tableBody.empty();
+                            travels.forEach(function(travel) {
+                                var row = `
+                                    <tr>
+                                        <td>${travel.id}</td>
+                                        <td>${travel.destination}</td>
+                                        <td>${travel.description}</td>
+                                        <td>$${travel.price.toFixed(2)}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-info btn-sm edit-btn" data-id="${travel.id}" data-destination="${travel.destination}" data-description="${travel.description}" data-price="${travel.price}">Edit</button>
+                                            <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="${travel.id}">Delete</button>
+                                        </td>
+                                    </tr>
+                                `;
+                                tableBody.append(row);
+                            });
+                        } else {
+                            alert('Failed to load travels: ' + response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 401 || xhr.status === 403) {
+                            alert('Session expired or unauthorized. Please log in again.');
+                            localStorage.removeItem('jwtToken');
+                            localStorage.removeItem('username');
+                            window.location.href = '/login';
+                        } else {
+                            alert('Error loading travels: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
+                        }
+                    }
+                });
+            }
+
+            fetchTravels();
+
+            // Add/Edit Form Submission
+            $('#travelForm').submit(function(event) {
+                event.preventDefault();
+
+                var id = $('#travelId').val();
+                var destination = $('#destination').val();
+                var description = $('#description').val();
+                var price = parseFloat($('#price').val());
+
+                var travelData = {
+                    destination: destination,
+                    description: description,
+                    price: price
+                };
+
+                var url = '/api/travels';
+                var type = 'POST';
+
+                if (id) { // If ID exists, it's an update
+                    url = '/api/travels/' + id;
+                    type = 'PUT';
+                }
+
+                $.ajax({
+                    url: url,
+                    type: type,
+                    contentType: 'application/json',
+                    headers: {
+                        'Authorization': 'Bearer ' + jwtToken
+                    },
+                    data: JSON.stringify(travelData),
+                    success: function(response) {
+                        if (response.result === 'SUCCESS') {
+                            $('#addTravelModal').modal('hide');
+                            fetchTravels(); // Reload list
+                            $('#travelForm')[0].reset(); // Reset form
+                            $('#travelId').val(''); // Clear hidden ID
+                        } else {
+                            alert('Operation failed: ' + response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Error during operation: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
+                    }
+                });
+            });
+
+            // Edit button click handler
+            $(document).on('click', '.edit-btn', function() {
+                var id = $(this).data('id');
+                var destination = $(this).data('destination');
+                var description = $(this).data('description');
+                var price = $(this).data('price');
+
+                $('#travelId').val(id);
+                $('#destination').val(destination);
+                $('#description').val(description);
+                $('#price').val(price);
+                $('#addTravelModalLabel').text('Edit Travel');
+                $('#addTravelModal').modal('show');
+            });
+
+            // Delete button click handler
+            $(document).on('click', '.delete-btn', function() {
+                var id = $(this).data('id');
+                if (confirm('Are you sure you want to delete this travel?')) {
+                    $.ajax({
+                        url: '/api/travels/' + id,
+                        type: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + jwtToken
+                        },
+                        success: function(response) {
+                            if (response.result === 'SUCCESS') {
+                                fetchTravels(); // Reload list
+                            } else {
+                                alert('Delete failed: ' + response.message);
+                            }
+                        },
+                        error: function(xhr) {
+                            alert('Error deleting travel: ' + (xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText));
+                        }
+                    });
+                }
+            });
+
+            // Reset form when modal is hidden
+            $('#addTravelModal').on('hidden.bs.modal', function () {
+                $('#travelForm')[0].reset();
+                $('#travelId').val('');
+                $('#addTravelModalLabel').text('Add New Travel');
+            });
+
+            // Logout button handler
+            $('#logoutButton').click(function(event) {
+                event.preventDefault();
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('username');
+                window.location.href = '/login';
+            });
+        });
+    </script>
+</body>
+</html> 

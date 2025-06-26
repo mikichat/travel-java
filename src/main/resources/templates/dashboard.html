@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background-color: #343a40;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h3 {
+            margin: 0;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            margin-top: 50px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+        }
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <h3>Travel CRM Dashboard</h3>
+        <div>
+            <span style="color: white; margin-right: 10px;" id="loggedInUsername"></span>
+            <a href="/travels">Manage Travels</a>
+            <a href="#" id="logoutButton">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome-message">
+            <h1>Welcome to Your Dashboard!</h1>
+            <p>From here, you can manage all your travel-related information.</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var username = localStorage.getItem('username');
+            if (username) {
+                $('#loggedInUsername').text('Hello, ' + username + '!');
+            } else {
+                window.location.href = '/login'; // Redirect if not logged in
+            }
+
+            $('#logoutButton').click(function(event) {
+                event.preventDefault();
+                localStorage.removeItem('jwtToken');
+                localStorage.removeItem('username');
+                window.location.href = '/login';
+            });
+        });
+    </script>
+</body>
+</html> 

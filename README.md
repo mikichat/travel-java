@@ -21,7 +21,7 @@
 ## 🛠 기술 스택
 
 - **백엔드**: Java 17, Spring Boot 3.x, Spring Web, Spring Data JPA, Lombok
-- **데이터베이스**: PostgreSQL
+- **데이터베이스**: MariaDB
 - **인증**: Spring Security, JWT (JJWT)
 - **프론트엔드**: HTML, Thymeleaf, Tailwind CSS, Font Awesome
 - **OCR**: Tesseract OCR (Tesseract OCR 엔진 시스템 설치 필요)
@@ -105,17 +105,19 @@ cd travel-java
     ```
     버전 정보가 출력되면 성공적으로 설치된 것입니다.
 
-### 3. PostgreSQL 데이터베이스 설정
+### 3. MariaDB 데이터베이스 설정
 
-`src/main/resources/application.properties` 파일에 PostgreSQL 연결 정보를 설정합니다.
+`src/main/resources/application.properties` 파일에 MariaDB 연결 정보를 설정합니다.
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/travelcrm
+spring.datasource.url=jdbc:mariadb://localhost:3306/travelcrm
 spring.datasource.username=your_username
 spring.datasource.password=your_password
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MariaDBDialect
 ```
 
 ### 4. 의존성 설치 및 애플리케이션 실행

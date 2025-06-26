@@ -6,7 +6,12 @@ import com.travelcrm.dto.UserRegisterRequestDto;
 import com.travelcrm.entity.User;
 import com.travelcrm.repository.UserRepository;
 import com.travelcrm.service.AuthService;
+import com.travelcrm.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +23,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public AuthResponseDto registerUser(UserRegisterRequestDto registerRequest) {
@@ -36,13 +47,18 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        // TODO: JWT 토큰 생성 및 반환 로직 추가 예정
-        return new AuthResponseDto("dummy_token_for_registration", user.getUsername());
+        String token = jwtUtil.generateToken(user.getUsername());
+        return new AuthResponseDto(token, user.getUsername());
     }
 
     @Override
     public AuthResponseDto loginUser(UserLoginRequestDto loginRequest) {
-        // TODO: Spring Security AuthenticationManager를 이용한 로그인 로직 및 JWT 토큰 생성 로직 추가 예정
-        throw new UnsupportedOperationException("Login functionality not yet implemented.");
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password())
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String token = jwtUtil.generateToken(loginRequest.username());
+        return new AuthResponseDto(token, loginRequest.username());
     }
 } 

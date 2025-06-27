@@ -15,6 +15,7 @@ public class Travel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
     private String destination;
     private String description;
     private Double price;

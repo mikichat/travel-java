@@ -6,12 +6,12 @@ import com.travelcrm.dto.ReservationResponseDto;
 import java.util.List;
 
 public interface ReservationService {
-    ReservationResponseDto createReservation(ReservationRequestDto reservationRequestDto);
-    ReservationResponseDto getReservationById(Long id);
-    ReservationResponseDto getReservationByCode(String reservationCode);
     List<ReservationResponseDto> getAllReservations();
+    ReservationResponseDto getReservationById(Long id);
+    ReservationResponseDto createReservation(ReservationRequestDto reservationRequestDto);
     ReservationResponseDto updateReservation(Long id, ReservationRequestDto reservationRequestDto);
     void deleteReservation(Long id);
-    boolean existsById(Long id);
-    String generateQrCodeForReservation(String reservationCode) throws Exception; // For QR code generation
+    List<ReservationResponseDto> getReservationsByTravelId(Long travelId);
+    List<ReservationResponseDto> getReservationsByUserId(Long userId);
+    ReservationResponseDto getReservationByCode(String reservationCode);
 } 

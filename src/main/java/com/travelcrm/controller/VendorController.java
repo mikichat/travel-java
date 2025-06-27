@@ -26,9 +26,9 @@ public class VendorController {
             VendorResponseDto createdVendor = vendorService.createVendor(vendorRequestDto);
             return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "업체가 성공적으로 생성되었습니다.", createdVendor), HttpStatus.CREATED);
         } catch (IllegalArgumentException ex) {
-            return GlobalExceptionHandler.<VendorResponseDto>errorResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", ex.getMessage(), null), HttpStatus.BAD_REQUEST);
         } catch (Exception ex) {
-            return GlobalExceptionHandler.<VendorResponseDto>errorResponseEntity("업체 생성 중 오류가 발생했습니다: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "업체 생성 중 오류가 발생했습니다: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -38,7 +38,7 @@ public class VendorController {
             List<VendorResponseDto> vendors = vendorService.getAllVendors();
             return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "모든 업체가 성공적으로 조회되었습니다.", vendors), HttpStatus.OK);
         } catch (Exception ex) {
-            return GlobalExceptionHandler.<List<VendorResponseDto>>errorResponseEntity("업체 목록 조회 중 오류가 발생했습니다: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "업체 목록 조회 중 오류가 발생했습니다: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -48,9 +48,9 @@ public class VendorController {
             VendorResponseDto vendor = vendorService.getVendorById(id);
             return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "업체가 성공적으로 조회되었습니다.", vendor), HttpStatus.OK);
         } catch (IllegalArgumentException ex) {
-            return GlobalExceptionHandler.<VendorResponseDto>errorResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", ex.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (Exception ex) {
-            return GlobalExceptionHandler.<VendorResponseDto>errorResponseEntity("업체 조회 중 오류가 발생했습니다: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "업체 조회 중 오류가 발생했습니다: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -60,23 +60,21 @@ public class VendorController {
             VendorResponseDto updatedVendor = vendorService.updateVendor(id, vendorRequestDto);
             return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "업체가 성공적으로 업데이트되었습니다.", updatedVendor), HttpStatus.OK);
         } catch (IllegalArgumentException ex) {
-            return GlobalExceptionHandler.<VendorResponseDto>errorResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", ex.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (Exception ex) {
-            return GlobalExceptionHandler.<VendorResponseDto>errorResponseEntity("업체 업데이트 중 오류가 발생했습니다: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "업체 업데이트 중 오류가 발생했습니다: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteVendor(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteVendor(@PathVariable Long id) {
         try {
             vendorService.deleteVendor(id);
             return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "업체가 성공적으로 삭제되었습니다.", null), HttpStatus.NO_CONTENT);
         } catch (IllegalArgumentException ex) {
-            ApiResponse<?> response = new ApiResponse<>("ERROR", ex.getMessage(), null);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", ex.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (Exception ex) {
-            ApiResponse<?> response = new ApiResponse<>("ERROR", "업체 삭제 중 오류가 발생했습니다: " + ex.getMessage(), null);
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "업체 삭제 중 오류가 발생했습니다: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 } 

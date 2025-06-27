@@ -24,11 +24,9 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationResponseDto>> createReservation(@Valid @RequestBody ReservationRequestDto reservationRequestDto) {
         try {
             ReservationResponseDto createdReservation = reservationService.createReservation(reservationRequestDto);
-            return new ResponseEntity<>(ApiResponse.success("Reservation created successfully", createdReservation), HttpStatus.CREATED);
-        } catch (IllegalArgumentException ex) {
-            return new ResponseEntity<>(ApiResponse.error(ex.getMessage(), null), HttpStatus.BAD_REQUEST);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ApiResponse.error("Error creating reservation: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "예약을 성공적으로 생성했습니다.", createdReservation), HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "예약 생성 중 오류가 발생했습니다: " + e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -36,11 +34,9 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationResponseDto>> getReservationById(@PathVariable Long id) {
         try {
             ReservationResponseDto reservation = reservationService.getReservationById(id);
-            return new ResponseEntity<>(ApiResponse.success("Reservation fetched successfully", reservation), HttpStatus.OK);
-        } catch (IllegalArgumentException ex) {
-            return new ResponseEntity<>(ApiResponse.error(ex.getMessage(), null), HttpStatus.NOT_FOUND);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ApiResponse.error("Error fetching reservation: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "예약을 성공적으로 불러왔습니다.", reservation), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "예약을 불러오는 중 오류가 발생했습니다: " + e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -60,9 +56,9 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<List<ReservationResponseDto>>> getAllReservations() {
         try {
             List<ReservationResponseDto> reservations = reservationService.getAllReservations();
-            return new ResponseEntity<>(ApiResponse.success("All reservations fetched successfully", reservations), HttpStatus.OK);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ApiResponse.error("Error fetching all reservations: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "예약 목록을 성공적으로 불러왔습니다.", reservations), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "예약 목록을 불러오는 중 오류가 발생했습니다: " + e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -70,35 +66,19 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationResponseDto>> updateReservation(@PathVariable Long id, @Valid @RequestBody ReservationRequestDto reservationRequestDto) {
         try {
             ReservationResponseDto updatedReservation = reservationService.updateReservation(id, reservationRequestDto);
-            return new ResponseEntity<>(ApiResponse.success("Reservation updated successfully", updatedReservation), HttpStatus.OK);
-        } catch (IllegalArgumentException ex) {
-            return new ResponseEntity<>(ApiResponse.error(ex.getMessage(), null), HttpStatus.BAD_REQUEST);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ApiResponse.error("Error updating reservation: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "예약을 성공적으로 업데이트했습니다.", updatedReservation), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "예약 업데이트 중 오류가 발생했습니다: " + e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> deleteReservation(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteReservation(@PathVariable Long id) {
         try {
             reservationService.deleteReservation(id);
-            return new ResponseEntity<>(ApiResponse.success("Reservation deleted successfully", null), HttpStatus.NO_CONTENT);
-        } catch (IllegalArgumentException ex) {
-            return new ResponseEntity<>(ApiResponse.error(ex.getMessage(), null), HttpStatus.NOT_FOUND);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ApiResponse.error("Error deleting reservation: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/qrcode/{reservationCode}")
-    public ResponseEntity<ApiResponse<String>> getQrCodeForReservation(@PathVariable String reservationCode) {
-        try {
-            String qrCodeBase64 = reservationService.generateQrCodeForReservation(reservationCode);
-            return new ResponseEntity<>(ApiResponse.success("QR code generated successfully", qrCodeBase64), HttpStatus.OK);
-        } catch (IllegalArgumentException ex) {
-            return new ResponseEntity<>(ApiResponse.error(ex.getMessage(), null), HttpStatus.NOT_FOUND);
-        } catch (Exception ex) {
-            return new ResponseEntity<>(ApiResponse.error("Error generating QR code: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "예약을 성공적으로 삭제했습니다.", null), HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "예약 삭제 중 오류가 발생했습니다: " + e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -107,11 +87,31 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<ReservationResponseDto>> getPublicReservationByCode(@PathVariable String reservationCode) {
         try {
             ReservationResponseDto reservation = reservationService.getReservationByCode(reservationCode);
-            return new ResponseEntity<>(ApiResponse.success("Public reservation fetched successfully", reservation), HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "Public reservation fetched successfully", reservation), HttpStatus.OK);
         } catch (IllegalArgumentException ex) {
-            return new ResponseEntity<>(ApiResponse.error(ex.getMessage(), null), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", ex.getMessage(), null), HttpStatus.NOT_FOUND);
         } catch (Exception ex) {
-            return new ResponseEntity<>(ApiResponse.error("Error fetching public reservation: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "Error fetching public reservation: " + ex.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/travel/{travelId}")
+    public ResponseEntity<ApiResponse<List<ReservationResponseDto>>> getReservationsByTravelId(@PathVariable Long travelId) {
+        try {
+            List<ReservationResponseDto> reservations = reservationService.getReservationsByTravelId(travelId);
+            return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "여행 ID로 예약 목록을 성공적으로 불러왔습니다.", reservations), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "여행 ID로 예약 목록을 불러오는 중 오류가 발생했습니다: " + e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ApiResponse<List<ReservationResponseDto>>> getReservationsByUserId(@PathVariable Long userId) {
+        try {
+            List<ReservationResponseDto> reservations = reservationService.getReservationsByUserId(userId);
+            return new ResponseEntity<>(new ApiResponse<>("SUCCESS", "사용자 ID로 예약 목록을 성공적으로 불러왔습니다.", reservations), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>("ERROR", "사용자 ID로 예약 목록을 불러오는 중 오류가 발생했습니다: " + e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 } 

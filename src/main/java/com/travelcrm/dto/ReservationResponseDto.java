@@ -4,13 +4,12 @@ import java.time.LocalDate;
 
 public record ReservationResponseDto(
     Long id,
-    String reservationCode,
     Long travelId,
+    String travelName,
     Long userId,
-    Long itineraryId,
+    String userName,
     LocalDate reservationDate,
     String status,
-    String paymentStatus,
-    Double totalAmount,
-    String notes
+    String notes,
+    String qrCodeUrl
 ) {} 

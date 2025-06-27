@@ -46,4 +46,6 @@ public class Reservation {
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    private String qrCodeUrl;
 } 

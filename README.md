@@ -9,7 +9,7 @@
 - **고객 관리**: 고객 정보 생성, 조회, 수정 및 삭제 기능, **여권 파일 첨부 및 정보 추출 기능 (OCR 기반)**
 - **여행 관리**: 여행 정보 생성, 조회, 수정 및 삭제 기능
 - **일정 관리**: 여행 일정 생성, 조회, 수정 및 삭제 기능
-- **예약 관리**: 여행 예약 생성, 조회, 수정 및 삭제 기능 (새로운 예약 코드 형식 및 QR코드 지원)
+- **예약 관리**: 여행 예약 생성, 조회, 수정 및 삭제 기능 (QR코드 지원 및 여행/사용자 ID 기반 조회 기능 포함)
 - **공개 예약 조회**: 예약 코드를 통해 로그인 없이 개별 예약 정보 조회 기능
 - **발권 관리**: 항공 발권 정보 생성, 조회, 수정 및 삭제 기능 (항공사, 비행 유형, 진행 상태, 코드, 여권 첨부, 메모 포함)
 - **데이터 내보내기**: 고객, 일정, 예약 데이터를 CSV 파일로 내보내는 기능
@@ -38,58 +38,72 @@ travel-java/
 │   │   │   └── com/
 │   │   │       └── travelcrm/
 │   │   │           ├── TravelCrmApplication.java  # 메인 애플리케이션 클래스
+│   │   │           ├── config/                   # Spring 설정 클래스
+│   │   │           │   ├── JwtAuthenticationFilter.java
+│   │   │           │   └── SecurityConfig.java
 │   │   │           ├── controller/               # REST 컨트롤러
 │   │   │           │   ├── AuthController.java
+│   │   │           │   ├── ItineraryController.java
+│   │   │           │   ├── ReservationController.java
 │   │   │           │   ├── TravelController.java
-│   │   │           │   ├── WebController.java
 │   │   │           │   ├── VendorController.java
-│   │   │           │   └── ItineraryController.java
+│   │   │           │   └── WebController.java
 │   │   │           ├── dto/                      # 데이터 전송 객체 (DTO)
 │   │   │           │   ├── AuthResponseDto.java
+│   │   │           │   ├── ItineraryRequestDto.java
+│   │   │           │   ├── ItineraryResponseDto.java
+│   │   │           │   ├── ReservationRequestDto.java
+│   │   │           │   ├── ReservationResponseDto.java
 │   │   │           │   ├── TravelRequestDto.java
 │   │   │           │   ├── TravelResponseDto.java
 │   │   │           │   ├── UserLoginRequestDto.java
 │   │   │           │   ├── UserRegisterRequestDto.java
-│   │   │           │   ├── VendorRequestDto.java
-│   │   │           │   ├── VendorResponseDto.java
-│   │   │           │   ├── ItineraryRequestDto.java
-│   │   │           │   └── ItineraryResponseDto.java
+│   │   │           │   ├── UserRequestDto.java
+│   │   │           │   └── UserResponseDto.java
 │   │   │           ├── entity/                   # JPA 엔티티
+│   │   │           │   ├── Itinerary.java
+│   │   │           │   ├── Reservation.java
 │   │   │           │   ├── Travel.java
 │   │   │           │   ├── User.java
-│   │   │           │   ├── Vendor.java
-│   │   │           │   └── Itinerary.java
+│   │   │           │   └── Vendor.java
 │   │   │           ├── repository/               # JPA 리포지토리
+│   │   │           │   ├── ItineraryRepository.java
+│   │   │           │   ├── ReservationRepository.java
 │   │   │           │   ├── TravelRepository.java
 │   │   │           │   ├── UserRepository.java
-│   │   │           │   ├── VendorRepository.java
-│   │   │           │   └── ItineraryRepository.java
+│   │   │           │   └── VendorRepository.java
 │   │   │           ├── service/                  # 서비스 인터페이스 및 구현체
 │   │   │           │   ├── AuthService.java
 │   │   │           │   ├── CustomUserDetailsService.java
-│   │   │           │   ├── TravelService.java
-│   │   │           │   ├── VendorService.java
 │   │   │           │   ├── ItineraryService.java
+│   │   │           │   ├── ReservationService.java
+│   │   │           │   ├── TravelService.java
+│   │   │           │   ├── UserService.java
+│   │   │           │   ├── VendorService.java
 │   │   │           │   └── impl/
 │   │   │           │       ├── AuthServiceImpl.java
+│   │   │           │       ├── CustomerServiceImpl.java
+│   │   │           │       ├── ItineraryServiceImpl.java
+│   │   │           │       ├── ReservationServiceImpl.java
 │   │   │           │       ├── TravelServiceImpl.java
-│   │   │           │       ├── VendorServiceImpl.java
-│   │   │           │       └── ItineraryServiceImpl.java
-│   │   │           ├── util/                     # 유틸리티 클래스
-│   │   │           │   ├── ApiResponse.java
-│   │   │           │   ├── GlobalExceptionHandler.java
-│   │   │           │   └── JwtUtil.java
-│   │   │           └── config/                   # Spring 설정 클래스
-│   │   │               ├── JwtAuthenticationFilter.java
-│   │   │               └── SecurityConfig.java
+│   │   │           │       ├── UserServiceImpl.java
+│   │   │           │       └── VendorServiceImpl.java
+│   │   │           └── util/                     # 유틸리티 클래스
+│   │   │               ├── ApiResponse.java
+│   │   │               ├── GlobalExceptionHandler.java
+│   │   │               └── JwtUtil.java
 │   │   └── resources/
 │   │       ├── application.properties    # Spring 설정 파일
 │   │       ├── templates/                # Thymeleaf 템플릿
+│   │       │   ├── customers.html
 │   │       │   ├── dashboard.html
+│   │       │   ├── fragments/
+│   │       │   │   └── header.html
+│   │       │   ├── itineraries.html
 │   │       │   ├── login.html
+│   │       │   ├── reservations.html
 │   │       │   ├── travels.html
-│   │       │   ├── vendors.html
-│   │       │   └── itineraries.html
+│   │       │   └── vendors.html
 │   │       └── static/                   # 정적 파일 (CSS, JS, 이미지)
 │   │           ├── css/
 │   │           ├── js/
@@ -178,6 +192,7 @@ mvn spring-boot:run
         7.  VIP 고객 - 재구매는 (V.V.IP 고객)
         8.  불만
         9.  처리완료
+    -   **QR코드 및 검색**: 예약 페이지에서 예약 ID 또는 사용자 ID로 예약 목록을 조회할 수 있으며, 각 예약에는 QR 코드가 포함됩니다.
 7.  **발권 관리**: `/ticketing`에서 항공 발권 정보 관리
     -   항공사 종류, 비행 유형 (편도, 왕복, 경유), 발권 진행 상태, 항공 발권 코드, 여권 첨부 및 메모 관리
 -   **예약코드와 QR코드**: 예약수정 페이지에서 예약코드에 마우스를 올리면 해당 예약의 QR코드(예약조회 URL)가 팝업으로 표시됩니다. (모바일 터치 지원)
@@ -248,23 +263,24 @@ public ResponseEntity<String> protectedRoute() {
 -   `GET /api/travels/{id}` - 특정 여행 조회
 -   `POST /api/travels` - 새 여행 생성
 -   `PUT /api/travels/{id}` - 여행 업데이트
--   `DELETE /api/travels/{id}` - 여행 삭제
 
 ### 일정 관리 API (`/api/itineraries`)
 
--   `POST /api/itineraries` - 새 일정 생성
--   `GET /api/itineraries/{id}` - 특정 일정 조회
--   `GET /api/itineraries/travel/{travelId}` - 특정 여행의 모든 일정 조회
--   `PUT /api/itineraries/{id}` - 일정 정보 업데이트
--   `DELETE /api/itineraries/{id}` - 일정 삭제
+-   `GET /api/itineraries` - 모든 여행 일정 조회
+-   `GET /api/itineraries/{id}` - 특정 여행 일정 조회
+-   `POST /api/itineraries` - 새 여행 일정 생성
+-   `PUT /api/itineraries/{id}` - 여행 일정 업데이트
+-   `DELETE /api/itineraries/{id}` - 여행 일정 삭제
+-   `GET /api/itineraries/travel/{travelId}` - 특정 여행 ID로 여행 일정 조회
 
 ### 예약 관리 API (`/api/reservations`)
 
 -   `GET /api/reservations` - 모든 예약 조회
 -   `GET /api/reservations/{id}` - 특정 예약 조회
 -   `POST /api/reservations` - 새 예약 생성
--   `PUT /api/reservations/{id}` - 예약 정보 업데이트
+-   `PUT /api/reservations/{id}` - 예약 업데이트
 -   `DELETE /api/reservations/{id}` - 예약 삭제
+-   `GET /api/reservations/travel/{travelId}` - 특정 여행 ID로 예약 조회
 -   `GET /api/public/reservations/{reservationCode}` - 예약 코드를 통한 공개 예약 조회
 
 ### 업체 관리 API (`/api/vendors`)

@@ -1,25 +1,26 @@
 package com.travelcrm.dto;
 
-import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public record ReservationRequestDto(
-    @NotNull(message = "Travel ID cannot be null")
+    @NotNull(message = "여행 ID는 필수입니다.")
     Long travelId,
 
-    @NotNull(message = "User ID cannot be null")
+    @NotNull(message = "사용자 ID는 필수입니다.")
     Long userId,
 
     Long itineraryId,
 
-    @NotNull(message = "Reservation date cannot be null")
+    @NotNull(message = "예약 날짜는 필수입니다.")
+    @FutureOrPresent(message = "예약 날짜는 현재 또는 미래여야 합니다.")
     LocalDate reservationDate,
 
-    @NotBlank(message = "Status cannot be blank")
-    @Size(max = 50, message = "Status cannot exceed 50 characters")
+    @NotBlank(message = "상태는 필수입니다.")
+    @Size(max = 50, message = "상태는 50자를 초과할 수 없습니다.")
     String status,
 
     @NotBlank(message = "Payment status cannot be blank")
@@ -27,8 +28,8 @@ public record ReservationRequestDto(
     String paymentStatus,
 
     @NotNull(message = "Total amount cannot be null")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Total amount must be positive")
     Double totalAmount,
 
+    @Size(max = 1000, message = "비고는 1000자를 초과할 수 없습니다.")
     String notes
 ) {} 

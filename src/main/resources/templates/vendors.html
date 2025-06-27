@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>업체 관리 - Travel CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .modal { display: none; }
+        .modal.open { display: flex; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <div th:replace="fragments/header :: header"></div>
+    <div class="container mx-auto mt-8 p-4">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">업체 관리</h1>
+
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-semibold text-gray-700">업체 목록</h2>
+                <button id="addVendorBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                    <i class="fas fa-plus mr-2"></i>새 업체 추가
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
+                            <th class="py-3 px-6 text-left">ID</th>
+                            <th class="py-3 px-6 text-left">업체명</th>
+                            <th class="py-3 px-6 text-left">취급 항목</th>
+                            <th class="py-3 px-6 text-left">담당자</th>
+                            <th class="py-3 px-6 text-left">이메일</th>
+                            <th class="py-3 px-6 text-left">전화</th>
+                            <th class="py-3 px-6 text-left">주소</th>
+                            <th class="py-3 px-6 text-left">웹사이트</th>
+                            <th class="py-3 px-6 text-left">메모</th>
+                            <th class="py-3 px-6 text-center">액션</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vendorTableBody" class="text-gray-600 text-sm font-light">
+                        <!-- Vendors will be loaded here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor Modal (Add/Edit) -->
+    <div id="vendorModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div class="relative p-8 bg-white w-full max-w-4xl mx-auto rounded-lg shadow-lg">
+            <h3 id="modalTitle" class="text-2xl font-semibold text-gray-800 mb-6">새 업체 추가</h3>
+            <form id="vendorForm">
+                <input type="hidden" id="vendorId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="name" class="block text-gray-700 text-sm font-bold mb-2">업체명<span class="text-red-500">*</span></label>
+                        <input type="text" id="name" name="name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label for="handledItems" class="block text-gray-700 text-sm font-bold mb-2">취급 항목 (쉼표로 구분)<span class="text-red-500">*</span></label>
+                        <input type="text" id="handledItems" name="handledItems" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="contactPerson" class="block text-gray-700 text-sm font-bold mb-2">담당자명</label>
+                        <input type="text" id="contactPerson" name="contactPerson" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label for="contactEmail" class="block text-gray-700 text-sm font-bold mb-2">담당자 이메일</label>
+                        <input type="email" id="contactEmail" name="contactEmail" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="contactPhone" class="block text-gray-700 text-sm font-bold mb-2">담당자 전화번호</label>
+                        <input type="text" id="contactPhone" name="contactPhone" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                    <div>
+                        <label for="address" class="block text-gray-700 text-sm font-bold mb-2">주소</label>
+                        <input type="text" id="address" name="address" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="website" class="block text-gray-700 text-sm font-bold mb-2">웹사이트</label>
+                    <input type="url" id="website" name="website" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-6">
+                    <label for="notes" class="block text-gray-700 text-sm font-bold mb-2">메모</label>
+                    <textarea id="notes" name="notes" rows="4" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        저장
+                    </button>
+                    <button type="button" id="closeVendorModalBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">
+                        취소
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div class="relative p-8 bg-white w-96 mx-auto rounded-lg shadow-lg text-center">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">업체 삭제 확인</h3>
+            <p class="mb-6">정말로 이 업체를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="confirmDeleteBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">삭제</button>
+                <button id="cancelDeleteBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const vendorModal = document.getElementById('vendorModal');
+        const addVendorBtn = document.getElementById('addVendorBtn');
+        const closeVendorModalBtn = document.getElementById('closeVendorModalBtn');
+        const vendorForm = document.getElementById('vendorForm');
+        const vendorTableBody = document.getElementById('vendorTableBody');
+        const modalTitle = document.getElementById('modalTitle');
+
+        const vendorIdInput = document.getElementById('vendorId');
+        const nameInput = document.getElementById('name');
+        const handledItemsInput = document.getElementById('handledItems');
+        const contactPersonInput = document.getElementById('contactPerson');
+        const contactEmailInput = document.getElementById('contactEmail');
+        const contactPhoneInput = document.getElementById('contactPhone');
+        const addressInput = document.getElementById('address');
+        const websiteInput = document.getElementById('website');
+        const notesInput = document.getElementById('notes');
+
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        let currentVendorIdToDelete = null;
+
+        // API Base URL
+        const API_BASE_URL = '/api/vendors';
+
+        // Function to fetch and display vendors
+        async function fetchVendors() {
+            try {
+                const response = await fetch(API_BASE_URL);
+                const apiResponse = await response.json();
+
+                vendorTableBody.innerHTML = '';
+                if (apiResponse.result === 'SUCCESS' && apiResponse.data) {
+                    apiResponse.data.forEach(vendor => {
+                        const row = `
+                            <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                <td class="py-3 px-6 text-left whitespace-nowrap">${vendor.id}</td>
+                                <td class="py-3 px-6 text-left">${vendor.name}</td>
+                                <td class="py-3 px-6 text-left">${vendor.handledItems ? vendor.handledItems.join(', ') : ''}</td>
+                                <td class="py-3 px-6 text-left">${vendor.contactPerson || ''}</td>
+                                <td class="py-3 px-6 text-left">${vendor.contactEmail || ''}</td>
+                                <td class="py-3 px-6 text-left">${vendor.contactPhone || ''}</td>
+                                <td class="py-3 px-6 text-left">${vendor.address || ''}</td>
+                                <td class="py-3 px-6 text-left">${vendor.website || ''}</td>
+                                <td class="py-3 px-6 text-left">${vendor.notes || ''}</td>
+                                <td class="py-3 px-6 text-center">
+                                    <div class="flex item-center justify-center">
+                                        <button class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110 edit-btn" data-id="${vendor.id}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="w-4 mr-2 transform hover:text-red-500 hover:scale-110 delete-btn" data-id="${vendor.id}">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        vendorTableBody.innerHTML += row;
+                    });
+
+                    // Attach event listeners to new buttons
+                    document.querySelectorAll('.edit-btn').forEach(button => {
+                        button.addEventListener('click', (e) => openEditModal(e.currentTarget.dataset.id));
+                    });
+                    document.querySelectorAll('.delete-btn').forEach(button => {
+                        button.addEventListener('click', (e) => openDeleteConfirmModal(e.currentTarget.dataset.id));
+                    });
+
+                } else {
+                    console.error('Failed to fetch vendors:', apiResponse.message);
+                }
+            } catch (error) {
+                console.error('Error fetching vendors:', error);
+            }
+        }
+
+        // Open Add Vendor Modal
+        addVendorBtn.addEventListener('click', () => {
+            modalTitle.textContent = '새 업체 추가';
+            vendorForm.reset();
+            vendorIdInput.value = '';
+            vendorModal.classList.add('open');
+        });
+
+        // Close Vendor Modal
+        closeVendorModalBtn.addEventListener('click', () => {
+            vendorModal.classList.remove('open');
+        });
+
+        // Open Edit Vendor Modal
+        async function openEditModal(id) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${id}`);
+                const apiResponse = await response.json();
+
+                if (apiResponse.result === 'SUCCESS' && apiResponse.data) {
+                    const vendor = apiResponse.data;
+                    modalTitle.textContent = '업체 수정';
+                    vendorIdInput.value = vendor.id;
+                    nameInput.value = vendor.name;
+                    handledItemsInput.value = vendor.handledItems ? vendor.handledItems.join(', ') : '';
+                    contactPersonInput.value = vendor.contactPerson;
+                    contactEmailInput.value = vendor.contactEmail;
+                    contactPhoneInput.value = vendor.contactPhone;
+                    addressInput.value = vendor.address;
+                    websiteInput.value = vendor.website;
+                    notesInput.value = vendor.notes;
+                    vendorModal.classList.add('open');
+                } else {
+                    console.error('Failed to fetch vendor for edit:', apiResponse.message);
+                    alert('업체 정보를 불러오는데 실패했습니다: ' + apiResponse.message);
+                }
+            } catch (error) {
+                console.error('Error fetching vendor for edit:', error);
+                alert('업체 정보를 불러오는 중 오류가 발생했습니다.');
+            }
+        }
+
+        // Handle Form Submission (Add/Edit)
+        vendorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = vendorIdInput.value;
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `${API_BASE_URL}/${id}` : API_BASE_URL;
+
+            const handledItemsArray = handledItemsInput.value.split(',').map(item => item.trim()).filter(item => item !== '');
+            if (handledItemsArray.length === 0) {
+                alert('취급 항목은 최소 한 개 이상이어야 합니다.');
+                return;
+            }
+
+            const vendorData = {
+                name: nameInput.value,
+                handledItems: handledItemsArray,
+                contactPerson: contactPersonInput.value,
+                contactEmail: contactEmailInput.value,
+                contactPhone: contactPhoneInput.value,
+                address: addressInput.value,
+                website: websiteInput.value,
+                notes: notesInput.value
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(vendorData),
+                });
+                const apiResponse = await response.json();
+
+                if (apiResponse.result === 'SUCCESS') {
+                    alert(id ? '업체가 성공적으로 업데이트되었습니다.' : '업체가 성공적으로 추가되었습니다.');
+                    vendorModal.classList.remove('open');
+                    fetchVendors(); // Refresh the list
+                } else {
+                    console.error('API Error:', apiResponse.message);
+                    alert('작업 실패: ' + apiResponse.message);
+                }
+            } catch (error) {
+                console.error('Network or other Error:', error);
+                alert('네트워크 오류 또는 기타 문제가 발생했습니다.');
+            }
+        });
+
+        // Open Delete Confirmation Modal
+        function openDeleteConfirmModal(id) {
+            currentVendorIdToDelete = id;
+            deleteConfirmModal.classList.add('open');
+        }
+
+        // Close Delete Confirmation Modal
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteConfirmModal.classList.remove('open');
+            currentVendorIdToDelete = null;
+        });
+
+        // Handle Delete Action
+        confirmDeleteBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/${currentVendorIdToDelete}`, {
+                    method: 'DELETE',
+                });
+                // Check for 204 No Content or success status
+                if (response.status === 204 || response.ok) {
+                    alert('업체가 성공적으로 삭제되었습니다.');
+                    deleteConfirmModal.classList.remove('open');
+                    fetchVendors(); // Refresh the list
+                } else {
+                    const apiResponse = await response.json();
+                    console.error('API Error:', apiResponse.message);
+                    alert('삭제 실패: ' + apiResponse.message);
+                }
+            } catch (error) {
+                console.error('Network or other Error:', error);
+                alert('네트워크 오류 또는 기타 문제가 발생했습니다.');
+            }
+        finally {
+                currentVendorIdToDelete = null;
+            }
+        });
+
+        // Initial load
+        fetchVendors();
+
+        // Basic Header Include (if not handled by Thymeleaf fragment already)
+        // You might need to manually load fragments/header.html content if Thymeleaf doesn't process it as expected in a simple file open scenario.
+        // For production, Thymeleaf will handle `th:replace`.
+    </script>
+</body>
+</html> 

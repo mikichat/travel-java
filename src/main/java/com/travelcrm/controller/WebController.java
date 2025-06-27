@@ -20,4 +20,9 @@ public class WebController {
     public String travels() {
         return "travels";
     }
+
+    @GetMapping("/vendors")
+    public String vendors() {
+        return "vendors";
+    }
 } 

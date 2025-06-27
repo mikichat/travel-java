@@ -1,13 +1,12 @@
 package com.travelcrm.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+
+import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Data
@@ -21,4 +20,21 @@ public class User {
     private String username;
     private String password;
     private String email;
+
+    private String firstName;
+    private String lastName;
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String nationality;
+    @Column(unique = true)
+    private String passportNumber;
+    private LocalDate passportIssueDate;
+    private LocalDate passportExpiryDate;
+    private String passportImageUrl;
+    private String phoneNumber;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private Set<String> roles;
 } 

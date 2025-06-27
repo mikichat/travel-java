@@ -25,4 +25,14 @@ public class WebController {
     public String vendors() {
         return "vendors";
     }
+
+    @GetMapping("/itineraries")
+    public String itineraries() {
+        return "itineraries";
+    }
+
+    @GetMapping("/reservations")
+    public String reservations() {
+        return "reservations";
+    }
 } 

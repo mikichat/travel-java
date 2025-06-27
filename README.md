@@ -39,44 +39,58 @@ travel-java/
 │   │   │           ├── TravelCrmApplication.java  # 메인 애플리케이션 클래스
 │   │   │           ├── controller/               # REST 컨트롤러
 │   │   │           │   ├── AuthController.java
-│   │   │           │   ├── CustomerController.java
-│   │   │           │   ├── ScheduleController.java
-│   │   │           │   ├── ReservationController.java
-│   │   │           │   ├── TicketingController.java
-│   │   │           │   └── PublicController.java
-│   │   │           ├── service/                  # 서비스 인터페이스 및 구현체
-│   │   │           │   ├── CustomerService.java
-│   │   │           │   ├── CustomerServiceImpl.java
-│   │   │           │   └── ...
-│   │   │           ├── repository/               # JPA 리포지토리
-│   │   │           │   ├── CustomerRepository.java
-│   │   │           │   └── ...
-│   │   │           ├── entity/                   # JPA 엔티티
-│   │   │           │   ├── Customer.java
-│   │   │           │   └── ...
+│   │   │           │   ├── TravelController.java
+│   │   │           │   ├── WebController.java
+│   │   │           │   └── VendorController.java
 │   │   │           ├── dto/                      # 데이터 전송 객체 (DTO)
-│   │   │           │   ├── CustomerDto.java
-│   │   │           │   └── ...
+│   │   │           │   ├── AuthResponseDto.java
+│   │   │           │   ├── TravelRequestDto.java
+│   │   │           │   ├── TravelResponseDto.java
+│   │   │           │   ├── UserLoginRequestDto.java
+│   │   │           │   ├── UserRegisterRequestDto.java
+│   │   │           │   ├── VendorRequestDto.java
+│   │   │           │   └── VendorResponseDto.java
+│   │   │           ├── entity/                   # JPA 엔티티
+│   │   │           │   ├── Travel.java
+│   │   │           │   ├── User.java
+│   │   │           │   └── Vendor.java
+│   │   │           ├── repository/               # JPA 리포지토리
+│   │   │           │   ├── TravelRepository.java
+│   │   │           │   ├── UserRepository.java
+│   │   │           │   └── VendorRepository.java
+│   │   │           ├── service/                  # 서비스 인터페이스 및 구현체
+│   │   │           │   ├── AuthService.java
+│   │   │           │   ├── CustomUserDetailsService.java
+│   │   │           │   ├── TravelService.java
+│   │   │           │   ├── VendorService.java
+│   │   │           │   └── impl/
+│   │   │           │       ├── AuthServiceImpl.java
+│   │   │           │       ├── TravelServiceImpl.java
+│   │   │           │       └── VendorServiceImpl.java
 │   │   │           ├── util/                     # 유틸리티 클래스
-│   │   │           │   ├── JwtUtil.java
-│   │   │           │   ├── OcrUtil.java
-│   │   │           │   └── ApiResponse.java
-│   │   │           │   └── GlobalExceptionHandler.java
+│   │   │           │   ├── ApiResponse.java
+│   │   │           │   ├── GlobalExceptionHandler.java
+│   │   │           │   └── JwtUtil.java
 │   │   │           └── config/                   # Spring 설정 클래스
-│   │   │               ├── SecurityConfig.java
-│   │   │               └── WebConfig.java
+│   │   │               ├── JwtAuthenticationFilter.java
+│   │   │               └── SecurityConfig.java
 │   │   └── resources/
+│   │       ├── application.properties    # Spring 설정 파일
 │   │       ├── templates/                # Thymeleaf 템플릿
-│   │       │   ├── login.html
 │   │       │   ├── dashboard.html
-│   │       │   └── ...
-│   │       ├── static/                   # 정적 파일 (CSS, JS, 이미지)
-│   │       │   ├── css/
-│   │   │   ├── js/
-│   │   │   └── images/
-│   │       └── application.properties    # Spring 설정 파일
+│   │       │   ├── login.html
+│   │       │   ├── travels.html
+│   │       │   └── vendors.html
+│   │       └── static/                   # 정적 파일 (CSS, JS, 이미지)
+│   │           ├── css/
+│   │           ├── js/
+│   │           └── images/
+├── mvnw
+├── mvnw.cmd
 ├── pom.xml                     # Maven 프로젝트 설정 파일
-└── README.md                   # 프로젝트 문서
+├── README.md                   # 프로젝트 문서
+├── README2.md
+└── LICENSE
 ```
 
 ## 🚀 시작하기
@@ -95,7 +109,7 @@ cd travel-java
 1.  **Tesseract OCR 다운로드**: 다음 링크에서 Windows용 설치 프로그램을 다운로드합니다.
     *   [Tesseract OCR for Windows](https://tesseract-ocr.github.io/tessdoc/Downloads.html) (현재 권장 버전: `tesseract-ocr-w64-setup-5.5.0.20241111.exe`와 유사한 파일명)
     https://github.com/tesseract-ocr/tesseract/releases/download/5.5.0/tesseract-ocr-w64-setup-5.5.0.20241111.exe
-2.  **설치 진행**:\
+2.  **설치 진행**:
     *   다운로드한 `.exe` 파일을 실행하여 설치를 시작합니다.
     *   설치 과정 중 **"Add Tesseract to Path"** 옵션을 반드시 체크하여 시스템 환경 변수에 Tesseract 실행 파일 경로가 자동으로 추가되도록 합니다. (이 단계를 건너뛰었다면 수동으로 PATH를 설정해야 합니다.)
     *   한국어 등 추가 언어 팩이 필요하면 설치 시 선택합니다.
@@ -144,7 +158,7 @@ mvn spring-boot:run
 3.  **고객 관리**: `/customers`에서 고객 정보 관리
 4.  **일정 관리**: `/schedules`에서 여행 일정 관리
 5.  **예약 관리**: `/reservations`에서 예약 정보 관리
-    -   **진행 단계**:\
+    -   **진행 단계**:
         1.  예약 요청 - 고객상담
         2.  진행 확인 - 담당자와 협의
         3.  대기 예약 - 입금 전
@@ -157,6 +171,7 @@ mvn spring-boot:run
 6.  **발권 관리**: `/ticketing`에서 항공 발권 정보 관리
     -   항공사 종류, 비행 유형 (편도, 왕복, 경유), 발권 진행 상태, 항공 발권 코드, 여권 첨부 및 메모 관리
 -   **예약코드와 QR코드**: 예약수정 페이지에서 예약코드에 마우스를 올리면 해당 예약의 QR코드(예약조회 URL)가 팝업으로 표시됩니다. (모바일 터치 지원)
+7.  **업체 관리**: `/vendors`에서 업체 정보 관리
 
 ### 대시보드 기능
 
@@ -232,7 +247,7 @@ public ResponseEntity<String> protectedRoute() {
 -   `POST /api/reservations` - 새 예약 생성
 -   `PUT /api/reservations/{id}` - 예약 정보 업데이트
 -   `DELETE /api/reservations/{id}` - 예약 삭제
--   `GET /api/public/reservations/{reservationCode}` - 예약 코드르 통한 공개 예약 조회
+-   `GET /api/public/reservations/{reservationCode}` - 예약 코드를 통한 공개 예약 조회
 
 ### 발권 관리 API (`/api/ticketing`)
 
